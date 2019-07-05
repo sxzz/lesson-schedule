@@ -47,14 +47,14 @@ export default {
       name: 'DAY1',
       lessons: [
         [
-          lessons.english,
-          lessons.english,
+          lessons.chinese,
+          lessons.chinese,
           lessons.math,
-          lessons.physics,
-          lessons.physics
+          lessons.english,
+          lessons.math
         ],
-        [lessons.biology, lessons.chinese, lessons.chemistry],
-        [lessons.physics]
+        [lessons.biology, lessons.chemistry, lessons.physics],
+        [lessons.chinese]
       ]
     },
     { name: 'DAY2', lessons: [{ name: '语文', teacher: '揭正卿' }] },
