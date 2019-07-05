@@ -13,33 +13,51 @@
       <span class="date">{{ date }}</span>
     </div>
 
-    <div class="lessons">
-      <div v-for="(period, index) in schedule" :key="index">
-        <divider>{{ period.name }}</divider>
-        <div class="lessons-list">
-          <div
-            v-for="(lesson, lession_index) in lessons[index]"
-            :key="lession_index"
-            class="lesson"
-          >
-            <div class="lesson-info">
-              <h4 class="lesson-title">{{ lesson.name }}</h4>
-              <p
-                class="lesson-desc"
-              >{{ period.lessons[lession_index].startTime }} ~ {{ period.lessons[lession_index].endTime }}</p>
-            </div>
-            <x-progress :percent="0" :show-cancel="false"></x-progress>
-          </div>
-        </div>
-      </div>
+    <div v-if="remainDuration" class="day-info">
+      <divider>距下课还有</divider>
+      <span class="time">{{ remainDuration }}</span>
     </div>
+
+    <div v-else-if="nextDuration" class="day-info">
+      <divider>距上课还有</divider>
+      <span class="time">{{ nextDuration }}</span>
+    </div>
+
+    <group class="lessons">
+      <div v-for="(period, index) in schedule" :key="index">
+        <cell
+          :title="period.name"
+          is-link
+          :border-intent="false"
+          :arrow-direction="period.show ? 'up' : 'down'"
+          @click.native="period.show = !period.show"
+        ></cell>
+        <template v-if="period.show">
+          <div class="lessons-list">
+            <div
+              v-for="(lesson, lession_index) in lessons[index]"
+              :key="lession_index"
+              class="lesson"
+            >
+              <div class="lesson-info">
+                <h4 class="lesson-title">{{ lesson.name }}</h4>
+                <p
+                  class="lesson-desc"
+                >{{ period.lessons[lession_index].startTime }} ~ {{ period.lessons[lession_index].endTime }}</p>
+              </div>
+              <x-progress :percent="period.lessons[lession_index].progress" :show-cancel="false"></x-progress>
+            </div>
+          </div>
+        </template>
+      </div>
+    </group>
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs'
 // import _ from 'lodash'
-import { XHeader, Divider, Panel, XProgress } from 'vux'
+import { XHeader, Divider, Panel, XProgress, Group, Cell, CellBox } from 'vux'
 import profile from '@/profile.js'
 
 export default {
@@ -48,23 +66,26 @@ export default {
     XHeader,
     Divider,
     Panel,
-    XProgress
+    XProgress,
+    Group,
+    Cell,
+    CellBox
   },
   data() {
     return {
       timer: null,
-      time: dayjs().format('HH:mm:ss'),
+      time: '',
       date: dayjs().format('MM月DD日'),
       schedule: [],
-      lessons: []
+      lessons: [],
+      remainDuration: null,
+      nextDuration: null
     }
   },
   created() {
-    this.timer = setInterval(() => {
-      this.time = dayjs().format('HH:mm:ss')
-    }, 1000)
+    this.timer = setInterval(this.refreshTime, 1000)
 
-    const now = dayjs()
+    const now = dayjs().add(profile.offset, 's')
     const startTime = dayjs(profile.startDate)
     const index = now.diff(startTime, 'day') % profile.cycle
     const day = profile.days[index]
@@ -72,8 +93,97 @@ export default {
 
     this.schedule = profile.schedule
     this.lessons = lessons
+
+    this.refreshTime()
   },
-  computed: {}
+  computed: {},
+  methods: {
+    refreshTime() {
+      this.now = dayjs().add(profile.offset, 's')
+      this.time = this.now.format('HH:mm:ss')
+
+      const date = this.now.format('YYYY-MM-DD')
+      let nextLesson
+
+      for (let i = 0; i < this.schedule.length; i++) {
+        const period = this.schedule[i]
+        const startTime = dayjs(date + ' ' + period.startTime)
+        const endTime = dayjs(date + period.endTime)
+        this.schedule[i].status = this.getScheduleStatus(startTime, endTime)
+
+        this.schedule[i].show =
+          this.schedule[i].show === undefined
+            ? this.schedule[i].status !== 'over'
+            : this.schedule[i].show
+
+        for (let j = 0; j < period.lessons.length; j++) {
+          const lesson = period.lessons[j]
+          const startTime = dayjs(date + ' ' + lesson.startTime)
+          const endTime = dayjs(date + ' ' + lesson.endTime)
+          const progress = this.getLessonProgress(startTime, endTime)
+          period.lessons[j].progress = progress
+
+          lesson.diff = startTime.diff(this.now)
+
+          if (lesson.diff > 0) {
+            if (nextLesson) {
+              if (lesson.diff < nextLesson.diff) {
+                nextLesson = lesson
+              }
+            } else {
+              nextLesson = lesson
+            }
+          }
+          if (progress > 0 && progress < 100) {
+            const remainSeconds = endTime.diff(this.now, 's')
+            if (remainSeconds) {
+              this.remainDuration = this.now
+                .startOf('day')
+                .add(remainSeconds, 's')
+                .format('HH:mm:ss')
+            } else {
+              this.remainDuration = null
+            }
+          }
+        }
+      }
+
+      {
+        const startTime = dayjs(date + nextLesson.startTime)
+        const remainSeconds = startTime.diff(this.now, 's')
+        if (remainSeconds) {
+          this.nextDuration = this.now
+            .startOf('day')
+            .add(remainSeconds, 's')
+            .format('HH:mm:ss')
+        } else {
+          this.nextDuration = null
+        }
+      }
+    },
+
+    getScheduleStatus(startTime, endTime) {
+      if (this.now.isAfter(endTime)) {
+        return 'over'
+      } else if (this.now.isBefore(startTime)) {
+        return 'waiting'
+      } else {
+        return 'processing'
+      }
+    },
+
+    getLessonProgress(startTime, endTime) {
+      if (this.now.isAfter(endTime)) {
+        return 100
+      } else if (this.now.isBefore(startTime)) {
+        return 0
+      } else {
+        const duration = endTime.diff(startTime)
+        const past = this.now.diff(startTime)
+        return (past / duration) * 100
+      }
+    }
+  }
 }
 </script>
 
@@ -97,9 +207,7 @@ export default {
     font-size: 1.3rem;
   }
 }
-</style>
 
-<style lang="less">
 .lessons {
   .lessons-list {
     background-color: #ffffff;

@@ -9,6 +9,7 @@ const lessons = {
 
 export default {
   cycle: 6,
+  offset: 130,
   startDate: '2019-06-30',
   endDate: '2019-07-23',
   schedule: [
@@ -42,7 +43,20 @@ export default {
     }
   ],
   days: [
-    { name: 'DAY1', lessons: [{ name: '语文', teacher: '揭正卿' }] },
+    {
+      name: 'DAY1',
+      lessons: [
+        [
+          lessons.english,
+          lessons.english,
+          lessons.math,
+          lessons.physics,
+          lessons.physics
+        ],
+        [lessons.biology, lessons.chinese, lessons.chemistry],
+        [lessons.physics]
+      ]
+    },
     { name: 'DAY2', lessons: [{ name: '语文', teacher: '揭正卿' }] },
     { name: 'DAY3', lessons: [{ name: '语文', teacher: '揭正卿' }] },
     { name: 'DAY4', lessons: [{ name: '语文', teacher: '揭正卿' }] },
