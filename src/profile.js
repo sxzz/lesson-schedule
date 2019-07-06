@@ -9,7 +9,7 @@ const lessons = {
 
 export default {
   cycle: 6,
-  offset: 133,
+  offset: 132,
   startDate: '2019-06-30',
   endDate: '2019-07-23',
   schedule: [
@@ -54,13 +54,65 @@ export default {
           lessons.math
         ],
         [lessons.biology, lessons.chemistry, lessons.physics],
+        [lessons.english]
+      ]
+    },
+    {
+      name: 'DAY2',
+      lessons: [
+        [
+          lessons.biology,
+          lessons.english,
+          lessons.math,
+          lessons.math,
+          lessons.english
+        ],
+        [lessons.chemistry, lessons.physics, lessons.chinese],
+        [lessons.biology]
+      ]
+    },
+    {
+      name: 'DAY3',
+      lessons: [
+        [
+          lessons.math,
+          lessons.english,
+          lessons.english,
+          lessons.chemistry,
+          lessons.chemistry
+        ],
+        [lessons.physics, lessons.biology, lessons.chinese],
+        [lessons.math]
+      ]
+    },
+    {
+      name: 'DAY4',
+      lessons: [
+        [
+          lessons.biology,
+          lessons.math,
+          lessons.chinese,
+          lessons.chinese,
+          lessons.biology
+        ],
+        [lessons.physics, lessons.chemistry, lessons.english],
+        [lessons.chemistry]
+      ]
+    },
+    {
+      name: 'DAY5',
+      lessons: [
+        [
+          lessons.chemistry,
+          lessons.biology,
+          lessons.chinese,
+          lessons.english,
+          lessons.chinese
+        ],
+        [lessons.math, lessons.math, lessons.physics],
         [lessons.chinese]
       ]
     },
-    { name: 'DAY2', lessons: [{ name: '语文', teacher: '揭正卿' }] },
-    { name: 'DAY3', lessons: [{ name: '语文', teacher: '揭正卿' }] },
-    { name: 'DAY4', lessons: [{ name: '语文', teacher: '揭正卿' }] },
-    { name: 'DAY5', lessons: [{ name: '语文', teacher: '揭正卿' }] },
     {
       name: 'DAY6',
       lessons: [

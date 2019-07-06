@@ -3,23 +3,23 @@
     <x-header
       class="header"
       :left-options="{showBack: false}"
-      :right-options="{showMore: false}"
-      @on-click-more="showMenus = true"
+      :right-options="{showMore: true}"
+      @on-click-more="handleMore"
     >课程表</x-header>
 
-    <div class="day-info">
-      <divider>现在时间</divider>
+    <div class="info">
+      <span class="title">现在时间</span>
       <span class="time">{{ time }}</span>
-      <span class="date">{{ date }}</span>
+      <span class="date">{{ displayDate }}</span>
     </div>
 
-    <div v-if="remainDuration" class="day-info">
-      <divider>距下课还有</divider>
+    <div v-if="remainDuration" class="info">
+      <span class="title">距下课还有</span>
       <span class="time">{{ remainDuration }}</span>
     </div>
 
-    <div v-else-if="nextDuration" class="day-info">
-      <divider>距上课还有</divider>
+    <div v-else-if="nextDuration" class="info">
+      <span class="title">距上课还有</span>
       <span class="time">{{ nextDuration }}</span>
     </div>
 
@@ -51,14 +51,24 @@
         </div>
       </div>
     </group>
+
+    <LessonTable :schedule="schedule" :lessons="lessons" style="margin-bottom: 10px;" />
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs'
 // import _ from 'lodash'
-import { XHeader, Divider, Panel, XProgress, Group, Cell, CellBox } from 'vux'
-import profile from '@/profile.js'
+import {
+  XHeader,
+  Divider,
+  Panel,
+  XProgress,
+  Group,
+  Cell,
+  TransferDom
+} from 'vux'
+import LessonTable from '@/components/LessonTable'
 
 export default {
   name: 'LessonSchedule',
@@ -69,41 +79,82 @@ export default {
     XProgress,
     Group,
     Cell,
-    CellBox
+    LessonTable
+  },
+  directives: {
+    TransferDom
   },
   data() {
     return {
       timer: null,
       time: '',
-      date: dayjs().format('MM月DD日'),
+      date: dayjs().format('YYYY-MM-DD'),
       schedule: [],
       lessons: [],
       remainDuration: null,
-      nextDuration: null
+      nextDuration: null,
+      profile: null,
+      profile_name: ''
     }
   },
   created() {
-    this.timer = setInterval(this.refreshTime, 1000)
+    this.profiles = JSON.parse(localStorage.getItem('profiles'))
+    const id = this.$route.params.id
 
-    const now = dayjs().add(profile.offset, 's')
-    const startTime = dayjs(profile.startDate)
-    const index = now.diff(startTime, 'day') % profile.cycle
-    const day = profile.days[index]
-    const lessons = day.lessons
+    if (!this.profiles || this.profiles.length === 0 || !this.profiles[id]) {
+      this.$router.push('/')
+      return
+    }
+    const profileInfo = this.profiles[id]
+    this.profile_name = profileInfo.name
+
+    const profile = JSON.parse(profileInfo.content)
+    if (!profile) {
+      this.$vux.toast.show({ text: '配置文件错误', type: 'cancel' })
+      this.$router.push('/')
+      return
+    }
 
     this.schedule = profile.schedule
-    this.lessons = lessons
+    this.profile = profile
+    this.lessons = this.getDayLessons(dayjs())
 
     this.refreshTime()
+    this.timer = setInterval(this.refreshTime, 1000)
   },
-  computed: {},
+  computed: {
+    displayDate() {
+      return dayjs(this.date).format('MM月DD日')
+    }
+  },
   methods: {
+    handleMore() {
+      this.$vux.datetime.show({
+        format: 'YYYY-MM-DD',
+        value: this.date,
+        startDate: this.profile.startDate,
+        endDate: this.profile.endDate,
+        cancelText: '取消',
+        confirmText: '确定',
+        onConfirm: val => {
+          const date = dayjs(val)
+          this.lessons = this.getDayLessons(date)
+          this.date = val
+          this.schedule.forEach(period => (period.show = true))
+        }
+      })
+    },
+    getDayLessons(date) {
+      const startTime = dayjs(this.profile.startDate)
+      const index = date.diff(startTime, 'day') % this.profile.cycle
+      return this.profile.days[index].lessons
+    },
     switchPeriodShow(index) {
       this.schedule[index].show = !this.schedule[index].show
       console.log(this.schedule[index].show)
     },
     refreshTime() {
-      this.now = dayjs().add(profile.offset, 's')
+      this.now = dayjs().add(this.profile.offset, 's')
       this.time = this.now.format('HH:mm:ss')
 
       const date = this.now.format('YYYY-MM-DD')
@@ -128,7 +179,6 @@ export default {
           period.lessons[j].progress = progress
 
           lesson.diff = startTime.diff(this.now)
-
           if (lesson.diff > 0) {
             if (nextLesson) {
               if (lesson.diff < nextLesson.diff) {
@@ -138,7 +188,9 @@ export default {
               nextLesson = lesson
             }
           }
+
           if (progress > 0 && progress < 100) {
+            period.lessons[j].progressing = true
             const remainSeconds = endTime.diff(this.now, 's')
             if (remainSeconds) {
               this.remainDuration = this.now
@@ -152,7 +204,7 @@ export default {
         }
       }
 
-      {
+      if (nextLesson) {
         const startTime = dayjs(date + nextLesson.startTime)
         const remainSeconds = startTime.diff(this.now, 's')
         if (remainSeconds) {
@@ -196,9 +248,19 @@ export default {
   border-bottom: #dedede 1px solid;
 }
 
-.day-info {
+.info {
   text-align: center;
-  margin-top: 10px;
+  background-color: #fff;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 15px;
+  border: #dedede 1px solid;
+
+  .title {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: 400;
+  }
 
   .time {
     display: block;
@@ -226,6 +288,8 @@ export default {
 }
 
 .lessons {
+  margin-bottom: 10px;
+
   .lessons-list {
     background-color: #ffffff;
     margin-top: 10px;
