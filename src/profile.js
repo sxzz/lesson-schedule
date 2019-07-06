@@ -9,7 +9,7 @@ const lessons = {
 
 export default {
   cycle: 6,
-  offset: 130,
+  offset: 133,
   startDate: '2019-06-30',
   endDate: '2019-07-23',
   schedule: [
@@ -20,7 +20,7 @@ export default {
       lessons: [
         { name: '第一节', startTime: '07:20', endTime: '08:05' },
         { name: '第二节', startTime: '08:15', endTime: '09:00' },
-        { name: '第三节', startTime: '09:10', endTime: '09:50' },
+        { name: '第三节', startTime: '09:10', endTime: '09:55' },
         { name: '第四节', startTime: '10:05', endTime: '10:50' },
         { name: '第五节', startTime: '11:00', endTime: '11:45' }
       ]

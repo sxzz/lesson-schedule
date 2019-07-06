@@ -30,25 +30,25 @@
           is-link
           :border-intent="false"
           :arrow-direction="period.show ? 'up' : 'down'"
-          @click.native="period.show = !period.show"
+          @click.native="switchPeriodShow(index)"
         ></cell>
-        <template v-if="period.show">
-          <div class="lessons-list">
-            <div
-              v-for="(lesson, lession_index) in lessons[index]"
-              :key="lession_index"
-              class="lesson"
-            >
-              <div class="lesson-info">
-                <h4 class="lesson-title">{{ lesson.name }}</h4>
-                <p
-                  class="lesson-desc"
-                >{{ period.lessons[lession_index].startTime }} ~ {{ period.lessons[lession_index].endTime }}</p>
-              </div>
-              <x-progress :percent="period.lessons[lession_index].progress" :show-cancel="false"></x-progress>
+        <div :class="period.show ? 'animate' : ''" class="slide lessons-list">
+          <div
+            v-for="(lesson, lession_index) in lessons[index]"
+            :key="lession_index"
+            class="lesson"
+          >
+            <div class="lesson-info">
+              <h4 class="lesson-title">{{ lesson.name }}</h4>
+              <p class="lesson-desc">
+                <span>{{ period.lessons[lession_index].startTime }} ~ {{ period.lessons[lession_index].endTime }}</span>
+                <span>{{ lesson.teacher }}</span>
+                <span>{{ period.lessons[lession_index].progress.toFixed(2) }}%</span>
+              </p>
             </div>
+            <x-progress :percent="period.lessons[lession_index].progress" :show-cancel="false"></x-progress>
           </div>
-        </template>
+        </div>
       </div>
     </group>
   </div>
@@ -98,6 +98,10 @@ export default {
   },
   computed: {},
   methods: {
+    switchPeriodShow(index) {
+      this.schedule[index].show = !this.schedule[index].show
+      console.log(this.schedule[index].show)
+    },
     refreshTime() {
       this.now = dayjs().add(profile.offset, 's')
       this.time = this.now.format('HH:mm:ss')
@@ -208,6 +212,19 @@ export default {
   }
 }
 
+.slide {
+  padding: 0 20px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.5s cubic-bezier(0, 1, 0, 1) -0.1s;
+}
+
+.animate {
+  max-height: 9999px;
+  transition-timing-function: cubic-bezier(0.5, 0, 1, 0);
+  transition-delay: 0s;
+}
+
 .lessons {
   .lessons-list {
     background-color: #ffffff;
@@ -258,6 +275,10 @@ export default {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
+
+        span:not(:first-child):before {
+          content: ' | ';
+        }
       }
     }
   }
