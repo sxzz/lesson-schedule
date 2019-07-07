@@ -2,7 +2,7 @@
   <div>
     <x-header
       class="header"
-      :left-options="{showBack: false}"
+      :left-options="{showBack: true}"
       :right-options="{showMore: true}"
       @on-click-more="handleMore"
     >课程表</x-header>
@@ -124,11 +124,31 @@ export default {
   },
   computed: {
     displayDate() {
-      return dayjs(this.date).format('MM月DD日')
+      const diff = dayjs(this.date).diff(this.now.startOf('day'), 'd')
+      if (diff > 0) {
+        if (diff === 1) {
+          return '明天'
+        }
+        return `${diff} 天后`
+      } else if (diff < 0) {
+        if (diff === -1) {
+          return '昨天'
+        }
+        return `${Math.abs(diff)} 天前`
+      } else {
+        return '今天'
+      }
     }
   },
   methods: {
+    changeDate(val) {
+      const date = dayjs(val)
+      this.lessons = this.getDayLessons(date)
+      this.date = val
+      this.schedule.forEach(period => (period.show = true))
+    },
     handleMore() {
+      // <datetime v-model="value7" @on-change="change" :title="$t('Birthday')" clear-text="today" @on-clear="setToday"></datetime>
       this.$vux.datetime.show({
         format: 'YYYY-MM-DD',
         value: this.date,
@@ -136,11 +156,12 @@ export default {
         endDate: this.profile.endDate,
         cancelText: '取消',
         confirmText: '确定',
+        clearText: '今天',
+        onClear: () => {
+          this.changeDate(dayjs().format('YYYY-MM-DD'))
+        },
         onConfirm: val => {
-          const date = dayjs(val)
-          this.lessons = this.getDayLessons(date)
-          this.date = val
-          this.schedule.forEach(period => (period.show = true))
+          this.changeDate(val)
         }
       })
     },
