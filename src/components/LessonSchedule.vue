@@ -108,8 +108,17 @@ export default {
     const profileInfo = this.profiles[id]
     this.profile_name = profileInfo.name
 
-    const profile = JSON.parse(profileInfo.content)
-    if (!profile) {
+    let profile
+    try {
+      profile = JSON.parse(profileInfo.content)
+    } catch (err) {
+      console.error(err)
+      this.$vux.toast.show({ text: '配置文件错误', type: 'cancel' })
+      this.$router.push('/')
+      return
+    }
+
+    if (!profile || !profile.schedule || !profile.startDate || !profile.days) {
       this.$vux.toast.show({ text: '配置文件错误', type: 'cancel' })
       this.$router.push('/')
       return
@@ -124,6 +133,7 @@ export default {
   },
   computed: {
     displayDate() {
+      if (!this.now) return ''
       const diff = dayjs(this.date).diff(this.now.startOf('day'), 'd')
       if (diff > 0) {
         if (diff === 1) {

@@ -9,6 +9,7 @@
     <swipeout>
       <swipeout-item v-for="(profile, index) in profiles" :key="index" transition-mode="follow">
         <div slot="right-menu">
+          <swipeout-button @click.native="modifyProfile(index)" type="primary">修改</swipeout-button>
           <swipeout-button @click.native="deleteProfile(index)" type="warn">删除</swipeout-button>
         </div>
         <cell
@@ -53,6 +54,9 @@ export default {
   methods: {
     handleMore() {
       this.$router.push('add')
+    },
+    modifyProfile(index) {
+      this.$router.push({ name: 'ModifyProfile', params: { id: index } })
     },
     deleteProfile(index) {
       this.profiles.splice(index, 1)

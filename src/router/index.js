@@ -10,7 +10,18 @@ export default new Router({
   mode: 'history',
   routes: [
     { path: '/', name: 'ProfileList', component: ProfileList },
-    { path: '/add', name: 'AddProfile', component: AddProfile },
+    {
+      path: '/add',
+      name: 'AddProfile',
+      component: AddProfile,
+      meta: { mode: 'add' }
+    },
+    {
+      path: '/modify/:id',
+      name: 'ModifyProfile',
+      component: AddProfile,
+      meta: { mode: 'modify' }
+    },
     { path: '/show/:id', name: 'LessonSchedule', component: LessonSchedule }
   ]
 })
