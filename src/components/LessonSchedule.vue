@@ -190,6 +190,7 @@ export default {
 
       const date = this.now.format('YYYY-MM-DD')
       let nextLesson
+      this.remainDuration = null
 
       for (let i = 0; i < this.schedule.length; i++) {
         const period = this.schedule[i]
