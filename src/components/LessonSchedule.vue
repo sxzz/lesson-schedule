@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="lesson-schedule">
     <x-header
       class="header"
       :left-options="{showBack: true}"
@@ -276,8 +276,17 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.lesson-schedule {
+  margin-top: 55px;
+}
+
 .header {
   border-bottom: #dedede 1px solid;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  backdrop-filter: saturate(180%) blur(20px);
+  z-index: 999999;
 }
 
 .info {

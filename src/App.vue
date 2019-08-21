@@ -24,6 +24,6 @@ export default {
 @import '~vux/src/styles/reset.less';
 
 body {
-  background-color: #ececf2;
+  background-color: #edecf2;
 }
 </style>
