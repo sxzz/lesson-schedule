@@ -10,19 +10,21 @@
       </thead>
       <tbody>
         <template v-for="(period, index) in schedule">
-          <tr :key="'period_' + index">
-            <td colspan="2" style="font-weight: bold;">{{ period.name }}</td>
-          </tr>
-          <tr
-            v-for="(lesson, lesson_index) in period.lessons"
-            :key="lesson.name"
-            :style="{ backgroundColor: lesson.progressing ? 'rgba(0,0,0,0.075)' : '' }"
-          >
-            <td>{{ lesson.name }}</td>
-            <td
-              :style="{ color: lesson.progressing ? 'red' : '' }"
-            >{{ lessons[index][lesson_index].name }}</td>
-          </tr>
+          <template v-if="lessons[index]">
+            <tr :key="'period_' + index">
+              <td colspan="2" style="font-weight: bold;">{{ period.name }}</td>
+            </tr>
+            <tr
+              v-for="(lesson, lesson_index) in period.lessons"
+              :key="lesson.name"
+              :style="{ backgroundColor: lesson.progressing ? 'rgba(0,0,0, 0.075)' : '' }"
+            >
+              <td>{{ lesson.name }}</td>
+              <td
+                :style="{ color: lesson.progressing ? 'red' : '' }"
+              >{{ lessons[index][lesson_index].name }}</td>
+            </tr>
+          </template>
         </template>
       </tbody>
     </x-table>

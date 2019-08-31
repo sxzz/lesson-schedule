@@ -10,7 +10,7 @@
     <div class="info">
       <span class="title">现在时间</span>
       <span class="time">{{ time }}</span>
-      <span class="date">{{ displayDate }}</span>
+      <span class="date">{{ displayDate + ' - ' + dayName }}</span>
     </div>
 
     <div v-if="remainDuration" class="info">
@@ -148,6 +148,11 @@ export default {
       } else {
         return '今天'
       }
+    },
+    dayName() {
+      const startTime = dayjs(this.profile.startDate)
+      const index = dayjs(this.date).diff(startTime, 'day') % this.profile.cycle
+      return this.profile.days[index].name
     }
   },
   methods: {
@@ -182,7 +187,6 @@ export default {
     },
     switchPeriodShow(index) {
       this.schedule[index].show = !this.schedule[index].show
-      console.log(this.schedule[index].show)
     },
     refreshTime() {
       this.now = dayjs().add(this.profile.offset, 's')
