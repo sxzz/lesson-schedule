@@ -1,21 +1,3 @@
 # lesson-schedule
 
-> A Vue.js project
-
-## Build Setup
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+<img width="317" alt="image" src="https://user-images.githubusercontent.com/6481596/193042730-31c571b6-76b8-47c7-9d09-5af2a87d2390.png">
