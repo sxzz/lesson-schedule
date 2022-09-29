@@ -18,6 +18,7 @@
 
 <script>
 import { XHeader, XTextarea, XInput, XButton, Group } from 'vux'
+import profile from '../profile'
 
 export default {
   name: 'AddProfile',
@@ -33,7 +34,7 @@ export default {
       mode: '',
       id: null,
       name: '',
-      content: ''
+      content: JSON.stringify(profile)
     }
   },
   created() {
